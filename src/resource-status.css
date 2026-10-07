@@ -1,0 +1,25 @@
+.resource-empty {
+  background: rgba(251, 249, 245, .45);
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+  padding: 52px 24px;
+  text-align: center;
+}
+
+.resource-empty svg {
+  color: var(--orange);
+  margin-bottom: 12px;
+}
+
+.resource-empty b {
+  display: block;
+  font-family: 'DM Serif Display';
+  font-size: 23px;
+  font-weight: 400;
+}
+
+.resource-empty p {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 6px 0 0;
+}

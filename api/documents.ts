@@ -1,0 +1,27 @@
+import { neon } from '@neondatabase/serverless'
+
+const allowedTypes = new Set(['question_paper', 'question_bank', 'study_note'])
+
+export async function GET(request: Request) {
+  try {
+    const databaseUrl = process.env.DATABASE_URL
+    if (!databaseUrl) return Response.json({ error: 'DATABASE_URL is not configured' }, { status: 500 })
+    const params = new URL(request.url).searchParams
+    const subjectCode = params.get('subjectCode')?.trim()
+    const documentType = params.get('type')?.trim() ?? 'question_paper'
+    if (!subjectCode) return Response.json({ error: 'subjectCode is required' }, { status: 400 })
+    if (!allowedTypes.has(documentType)) return Response.json({ error: 'Invalid document type' }, { status: 400 })
+    const sql = neon(databaseUrl)
+    const documents = await sql`
+      SELECT d.id, d.title, d.document_type, d.exam_type, d.unit_number, d.academic_year,
+             d.file_name, d.storage_key, s.subject_code, s.subject_name
+      FROM documents d JOIN subjects s ON s.id = d.subject_id
+      WHERE s.subject_code = ${subjectCode} AND d.document_type = ${documentType} AND d.status = 'published'
+      ORDER BY d.academic_year DESC NULLS LAST, d.created_at DESC
+    `
+    return Response.json({ documents }, { headers: { 'Cache-Control': 'public, max-age=30, s-maxage=120' } })
+  } catch (error) {
+    console.error('Failed to load Neon documents', error)
+    return Response.json({ error: 'Unable to load documents' }, { status: 500 })
+  }
+}

@@ -1,0 +1,25 @@
+.semester-coming-soon {
+  border-top: 1px solid var(--border);
+  padding: 64px 24px 76px;
+  text-align: center;
+}
+
+.semester-coming-soon .eyebrow {
+  margin-bottom: 12px;
+}
+
+.semester-coming-soon h2 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.semester-coming-soon p:last-child {
+  color: var(--muted);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .semester-coming-soon {
+    padding: 48px 14px 60px;
+  }
+}
