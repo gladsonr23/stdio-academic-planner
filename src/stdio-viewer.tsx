@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { ArrowLeft, BookOpen, Bot, Copy, FileText, MessageSquareText, RotateCw } from 'lucide-react'
+import { ArrowLeft, BookOpen, Copy, FileText, MessageSquareText, RotateCw } from 'lucide-react'
 import type { AcademicDocument, AcademicSubject } from './academic-collections'
+import { StdioLogo } from './stdio-logo'
 import './stdio-viewer.css'
 
 type Props = {
@@ -35,7 +36,7 @@ export function StdioViewer({ document, subject, category, onBack }: Props) {
       </div>
 
       <aside className="stdio-rag-panel" aria-label="Ask STDiO Bot about this document">
-        <div className="stdio-rag-title"><span><Bot size={18} /></span><div><p>STDiO BOT</p><h2>Ask about this file</h2></div></div>
+        <div className="stdio-rag-title"><span><StdioLogo className="stdio-rag-logo" /></span><div><p>STDiO BOT</p><h2>Ask about this file</h2></div></div>
         <div className="stdio-context-card"><span>DOCUMENT CONTEXT</span><b>{document.title}</b><p>{subject.code} · {subject.name}</p><small>Document ID attached for future RAG queries</small></div>
         <label className="stdio-question-label" htmlFor="stdio-viewer-question">Question or highlighted passage</label>
         <textarea id="stdio-viewer-question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Copy a question from the PDF and paste it here, or write what you want to know…" />

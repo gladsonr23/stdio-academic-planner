@@ -4,6 +4,8 @@
 .stdio-viewer-back{display:flex;align-items:center;gap:7px;color:var(--green);font-size:12px;font-weight:600;white-space:nowrap}
 .stdio-viewer-heading{display:flex;align-items:center;gap:11px;min-width:0}
 .stdio-viewer-mark,.stdio-rag-title>span{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--border);border-radius:8px;color:var(--orange);flex:none}
+.stdio-rag-title>span{width:54px}
+.stdio-rag-logo{display:block;width:46px;height:15px;mix-blend-mode:multiply}
 .stdio-viewer-heading>div{min-width:0}
 .stdio-viewer-heading p,.stdio-rag-title p{margin:0 0 3px;color:var(--orange);font-size:9px;font-weight:700;letter-spacing:.12em}
 .stdio-viewer-heading p span{color:var(--faint);padding:0 4px}
