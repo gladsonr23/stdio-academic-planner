@@ -1,5 +1,5 @@
-import { adminCookie, clearedAdminCookie, isAdminRequest, passwordMatches } from './lib/admin-auth'
-import { env } from './lib/runtime'
+import { adminCookie, clearedAdminCookie, isAdminRequest, passwordMatches } from './lib/admin-auth.js'
+import { env } from './lib/runtime.js'
 
 export async function GET(request: Request) {
   return Response.json({ authenticated: await isAdminRequest(request) }, {

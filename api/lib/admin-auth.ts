@@ -1,4 +1,4 @@
-import { env } from './runtime'
+import { env } from './runtime.js'
 
 const cookieName = 'stdio_admin'
 const sessionSeconds = 60 * 60 * 8

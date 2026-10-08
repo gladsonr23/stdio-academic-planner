@@ -1,7 +1,7 @@
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { neon } from '@neondatabase/serverless'
-import { isAdminRequest } from './lib/admin-auth'
-import { env } from './lib/runtime'
+import { isAdminRequest } from './lib/admin-auth.js'
+import { env } from './lib/runtime.js'
 
 const maxFileSize = 4 * 1024 * 1024
 const validTypes = new Set(['question_paper', 'question_bank', 'study_note'])
