@@ -19,7 +19,9 @@ export async function GET(request: Request) {
       WHERE s.subject_code = ${subjectCode} AND d.document_type = ${documentType} AND d.status = 'published'
       ORDER BY d.academic_year DESC NULLS LAST, d.created_at DESC
     `
-    return Response.json({ documents }, { headers: { 'Cache-Control': 'public, max-age=30, s-maxage=120' } })
+    // Admin uploads and archives change this list at runtime; stale cached IDs can
+    // point to archived rows that the file endpoint correctly refuses to open.
+    return Response.json({ documents }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     console.error('Failed to load Neon documents', error)
     return Response.json({ error: 'Unable to load documents' }, { status: 500 })

@@ -43,7 +43,7 @@ function useNeonDocuments(subjectCode: string | undefined, type: 'question_paper
     const controller = new AbortController()
     setLoading(true)
     setConnected(false)
-    fetch(`/api/documents?subjectCode=${encodeURIComponent(subjectCode)}&type=${type}`, { signal: controller.signal })
+    fetch(`/api/documents?subjectCode=${encodeURIComponent(subjectCode)}&type=${type}`, { signal: controller.signal, cache: 'no-store' })
       .then(response => { if (!response.ok) throw new Error('Documents API unavailable'); return response.json() })
       .then(({ documents: rows }: { documents: Document[] }) => { setDocuments(rows); setConnected(true); setLoading(false) })
       .catch(error => { if (error.name !== 'AbortError') { setDocuments([]); setConnected(false); setLoading(false) } })
