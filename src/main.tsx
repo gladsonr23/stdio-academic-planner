@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BookOpen, Bot, ChevronRight, FileText, MessageSquare, Minimize2, Send, Sparkles, X } from 'lucide-react'
+import { BookOpen, Bot, ChevronRight, FileText, MessageSquare, Minimize2, Presentation, Send, Sparkles, Video, X } from 'lucide-react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
 import './coming-soon.css'
@@ -24,7 +24,6 @@ function AppShell({ children, view, setView, drawer, setDrawer }: {
     <header className="topnav">
       <div className="brand"><StdioLogo className="brand-logo"/><i/><b>Academic Planner</b></div>
       <nav>{nav.map(([key, label]) => <button key={key} onClick={() => setView(key)} className={view === key ? 'active' : ''}>{label}</button>)}</nav>
-      <button className="avatar" aria-label="Open team upload portal" title="Team upload portal" onClick={() => window.location.assign(`${import.meta.env.BASE_URL}admin`)}>G</button>
     </header>
     <main>{children}</main>
     <aside className="rail">
@@ -62,7 +61,12 @@ function FloatingAI() {
 }
 
 function Tools() {
-  return <><section className="page-heading"><p className="eyebrow">STUDY SUPPORT</p><h1>Tools</h1><p className="lede">Quick access to tools that support your learning.</p></section><div className="empty-library"><Sparkles size={28}/><h2>Study tools</h2><p>Tools for working with your course materials will appear here.</p></div></>
+  const tools = [
+    { title: 'YouTube video to notes', detail: 'Turn a lecture video into clear study notes.', icon: Video, available: true },
+    { title: 'PDF/PPT to notes', detail: 'Create study notes from a PDF or presentation.', icon: Presentation, available: true },
+    ...Array.from({ length: 6 }, (_, index) => ({ title: 'Coming soon', detail: 'More study tools are on the way.', icon: Sparkles, available: false })),
+  ]
+  return <><section className="page-heading"><p className="eyebrow">STUDY SUPPORT</p><h1>Tools</h1><p className="lede">Choose a tool to turn your learning materials into useful study resources.</p></section><div className="tool-grid">{tools.map(({ title, detail, icon: Icon, available }, index) => <article className={'tool-card' + (available ? ' tool-card-ready' : '')} key={`${title}-${index}`}><span className="tool-card-kicker">{available ? 'STUDY TOOL' : 'COMING SOON'}</span><Icon size={21}/><h2>{title}</h2><p>{detail}</p></article>)}</div></>
 }
 
 function App() {
