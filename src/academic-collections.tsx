@@ -32,7 +32,7 @@ function useNeonSubjects() {
   return { subjects, source }
 }
 
-function useNeonDocuments(subjectCode: string | undefined, type: 'question_paper' | 'study_note') {
+function useNeonDocuments(subjectCode: string | undefined, type: 'question_paper' | 'question_bank' | 'study_note') {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(false)
   const [connected, setConnected] = useState(false)
@@ -78,12 +78,13 @@ function EmptyResources({ loading, connected, label }: { loading: boolean; conne
 export function QuestionBanksV2({ onOpen }: { onOpen: () => void }) {
   const [semester, setSemester] = useState(3)
   const [subject, setSubject] = useState<Subject | null>(null)
+  const [materialType, setMaterialType] = useState<'question_paper' | 'question_bank'>('question_paper')
   const { subjects, source } = useNeonSubjects()
-  const { documents, loading, connected } = useNeonDocuments(subject?.code, 'question_paper')
-  const changeSemester = (number: number) => { setSemester(number); setSubject(null) }
+  const { documents, loading, connected } = useNeonDocuments(subject?.code, materialType)
+  const changeSemester = (number: number) => { setSemester(number); setSubject(null); setMaterialType('question_paper') }
   return <><CollectionHeader eyebrow="ARCHIVE" title="Question Banks" subtitle="Every paper. Every question. Every answer." /><SemesterPicker semester={semester} onChange={changeSemester} />{semester !== 3 ? <ComingSoon semester={semester} content="Question banks" /> : subject ?
-    <section className="collection-section resource-view"><button className="collection-back" onClick={() => setSubject(null)}><ArrowLeft size={15} /> All semester 3 subjects</button><div className="resource-title"><div><p className="eyebrow">{subject.code} · {subject.credits} CREDITS</p><h2>{subject.name}</h2></div><span>{connected ? 'NEON DATA' : 'SAMPLE MODE'}</span></div>{documents.length ? <div className="resource-grid">{documents.map(document =>
-      <button className="resource-card" onClick={() => window.open(`/api/file?id=${encodeURIComponent(document.id)}`, '_blank', 'noopener,noreferrer')} key={document.id}><FileText size={21} /><div><span>{document.exam_type ?? 'QUESTION PAPER'} · {document.academic_year ?? 'YEAR NOT SET'}</span><b>{document.title}</b><small>Open uploaded PDF <ChevronRight size={14} /></small></div></button>)}</div> : <EmptyResources loading={loading} connected={connected} label="question papers" />}</section>
+    <section className="collection-section resource-view"><button className="collection-back" onClick={() => setSubject(null)}><ArrowLeft size={15} /> All semester 3 subjects</button><div className="resource-title"><div><p className="eyebrow">{subject.code} · {subject.credits} CREDITS</p><h2>{subject.name}</h2></div><span>{connected ? 'NEON DATA' : 'SAMPLE MODE'}</span></div><div className="admin-material-tabs"><button className={materialType==='question_paper'?'active':''} onClick={()=>setMaterialType('question_paper')}>Question papers</button><button className={materialType==='question_bank'?'active':''} onClick={()=>setMaterialType('question_bank')}>Question banks</button></div>{documents.length ? <div className="resource-grid">{documents.map(document =>
+      <button className="resource-card" onClick={() => window.open(`/api/file?id=${encodeURIComponent(document.id)}`, '_blank', 'noopener,noreferrer')} key={document.id}><FileText size={21} /><div><span>{document.exam_type ?? (materialType==='question_bank' ? 'QUESTION BANK' : 'QUESTION PAPER')} · {document.academic_year ?? 'YEAR NOT SET'}</span><b>{document.title}</b><small>Open uploaded PDF <ChevronRight size={14} /></small></div></button>)}</div> : <EmptyResources loading={loading} connected={connected} label={materialType==='question_bank' ? 'question banks' : 'question papers'} />}</section>
     : <SubjectList subjects={subjects} source={source} title="Choose a subject" onSelect={setSubject} />}</>
 }
 
@@ -95,6 +96,6 @@ export function StudyNotesV2() {
   const changeSemester = (number: number) => { setSemester(number); setSubject(null) }
   return <><CollectionHeader eyebrow="MATERIAL LIBRARY" title="Study Notes" subtitle="Focused notes, organized around your semester and subjects." /><SemesterPicker semester={semester} onChange={changeSemester} />{semester !== 3 ? <ComingSoon semester={semester} content="Study notes" /> : subject ?
     <section className="collection-section resource-view"><button className="collection-back" onClick={() => setSubject(null)}><ArrowLeft size={15} /> All semester 3 subjects</button><div className="resource-title"><div><p className="eyebrow">{subject.code} · {subject.credits} CREDITS</p><h2>{subject.name}</h2></div><span>{connected ? 'NEON DATA' : 'SAMPLE MODE'}</span></div>{documents.length ? <div className="resource-grid notes-resources">{documents.map(document =>
-      <article className="resource-card" key={document.id}><BookOpen size={21} /><div><span>{document.unit_number ? `UNIT ${document.unit_number}` : 'STUDY NOTE'}</span><b>{document.title}</b><small>{document.file_name}</small><button className="btn outline">Open notes</button></div></article>)}</div> : <EmptyResources loading={loading} connected={connected} label="study notes" />}</section>
+      <article className="resource-card" key={document.id}><BookOpen size={21} /><div><span>{document.unit_number ? `UNIT ${document.unit_number}` : 'STUDY NOTE'}</span><b>{document.title}</b><small>{document.file_name}</small><button className="btn outline" onClick={() => window.open(`/api/file?id=${encodeURIComponent(document.id)}`, '_blank', 'noopener,noreferrer')}>Open notes</button></div></article>)}</div> : <EmptyResources loading={loading} connected={connected} label="study notes" />}</section>
     : <SubjectList subjects={subjects} source={source} title="Choose a subject" onSelect={setSubject} />}</>
 }
