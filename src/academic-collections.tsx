@@ -3,8 +3,10 @@ import { ArrowLeft, BookOpen, ChevronRight, FileText } from 'lucide-react'
 import './academic-collections.css'
 import './resource-status.css'
 
-type Subject = { id?: string; code: string; name: string; shortName: string; credits: number }
-type Document = { id: string; title: string; exam_type: string | null; unit_number: number | null; academic_year: string | null; file_name: string; storage_key: string }
+export type AcademicSubject = { id?: string; code: string; name: string; shortName: string; credits: number }
+export type AcademicDocument = { id: string; title: string; exam_type: string | null; unit_number: number | null; academic_year: string | null; file_name: string; storage_key: string }
+type Subject = AcademicSubject
+type Document = AcademicDocument
 type SubjectApiRow = { id: string; subject_code: string; subject_name: string; short_name: string; credits: number }
 
 const fallbackSubjects: Subject[] = [
@@ -75,7 +77,7 @@ function EmptyResources({ loading, connected, label }: { loading: boolean; conne
   return <div className="resource-empty"><FileText size={22} /><b>{loading ? 'Loading from Neon…' : connected ? `No published ${label} yet` : 'API connection required'}</b><p>{connected ? 'Upload and publish a file in Neon to make it appear here.' : 'Sample subjects remain available while the secure API is offline.'}</p></div>
 }
 
-export function QuestionBanksV2({ onOpen }: { onOpen: () => void }) {
+export function QuestionBanksV2({ onOpen }: { onOpen: (document: AcademicDocument, subject: AcademicSubject, category: string) => void }) {
   const [semester, setSemester] = useState(3)
   const [subject, setSubject] = useState<Subject | null>(null)
   const [materialType, setMaterialType] = useState<'question_paper' | 'question_bank'>('question_paper')
@@ -84,11 +86,11 @@ export function QuestionBanksV2({ onOpen }: { onOpen: () => void }) {
   const changeSemester = (number: number) => { setSemester(number); setSubject(null); setMaterialType('question_paper') }
   return <><CollectionHeader eyebrow="ARCHIVE" title="Question Banks" subtitle="Every paper. Every question. Every answer." /><SemesterPicker semester={semester} onChange={changeSemester} />{semester !== 3 ? <ComingSoon semester={semester} content="Question banks" /> : subject ?
     <section className="collection-section resource-view"><button className="collection-back" onClick={() => setSubject(null)}><ArrowLeft size={15} /> All semester 3 subjects</button><div className="resource-title"><div><p className="eyebrow">{subject.code} · {subject.credits} CREDITS</p><h2>{subject.name}</h2></div><span>{connected ? 'NEON DATA' : 'SAMPLE MODE'}</span></div><div className="admin-material-tabs"><button className={materialType==='question_paper'?'active':''} onClick={()=>setMaterialType('question_paper')}>Question papers</button><button className={materialType==='question_bank'?'active':''} onClick={()=>setMaterialType('question_bank')}>Question banks</button></div>{documents.length ? <div className="resource-grid">{documents.map(document =>
-      <button className="resource-card" onClick={() => window.open(`/api/file?id=${encodeURIComponent(document.id)}`, '_blank', 'noopener,noreferrer')} key={document.id}><FileText size={21} /><div><span>{document.exam_type ?? (materialType==='question_bank' ? 'QUESTION BANK' : 'QUESTION PAPER')} · {document.academic_year ?? 'YEAR NOT SET'}</span><b>{document.title}</b><small>Open uploaded PDF <ChevronRight size={14} /></small></div></button>)}</div> : <EmptyResources loading={loading} connected={connected} label={materialType==='question_bank' ? 'question banks' : 'question papers'} />}</section>
+      <button className="resource-card" onClick={() => onOpen(document, subject, document.exam_type ?? (materialType === 'question_bank' ? 'Question bank' : 'Question paper'))} key={document.id}><FileText size={21} /><div><span>{document.exam_type ?? (materialType==='question_bank' ? 'QUESTION BANK' : 'QUESTION PAPER')} · {document.academic_year ?? 'YEAR NOT SET'}</span><b>{document.title}</b><small>Open in STDiO Viewer <ChevronRight size={14} /></small></div></button>)}</div> : <EmptyResources loading={loading} connected={connected} label={materialType==='question_bank' ? 'question banks' : 'question papers'} />}</section>
     : <SubjectList subjects={subjects} source={source} title="Choose a subject" onSelect={setSubject} />}</>
 }
 
-export function StudyNotesV2() {
+export function StudyNotesV2({ onOpen }: { onOpen: (document: AcademicDocument, subject: AcademicSubject, category: string) => void }) {
   const [semester, setSemester] = useState(3)
   const [subject, setSubject] = useState<Subject | null>(null)
   const { subjects, source } = useNeonSubjects()
@@ -96,6 +98,6 @@ export function StudyNotesV2() {
   const changeSemester = (number: number) => { setSemester(number); setSubject(null) }
   return <><CollectionHeader eyebrow="MATERIAL LIBRARY" title="Study Notes" subtitle="Focused notes, organized around your semester and subjects." /><SemesterPicker semester={semester} onChange={changeSemester} />{semester !== 3 ? <ComingSoon semester={semester} content="Study notes" /> : subject ?
     <section className="collection-section resource-view"><button className="collection-back" onClick={() => setSubject(null)}><ArrowLeft size={15} /> All semester 3 subjects</button><div className="resource-title"><div><p className="eyebrow">{subject.code} · {subject.credits} CREDITS</p><h2>{subject.name}</h2></div><span>{connected ? 'NEON DATA' : 'SAMPLE MODE'}</span></div>{documents.length ? <div className="resource-grid notes-resources">{documents.map(document =>
-      <article className="resource-card" key={document.id}><BookOpen size={21} /><div><span>{document.unit_number ? `UNIT ${document.unit_number}` : 'STUDY NOTE'}</span><b>{document.title}</b><small>{document.file_name}</small><button className="btn outline" onClick={() => window.open(`/api/file?id=${encodeURIComponent(document.id)}`, '_blank', 'noopener,noreferrer')}>Open notes</button></div></article>)}</div> : <EmptyResources loading={loading} connected={connected} label="study notes" />}</section>
+      <article className="resource-card" key={document.id}><BookOpen size={21} /><div><span>{document.unit_number ? `UNIT ${document.unit_number}` : 'STUDY NOTE'}</span><b>{document.title}</b><small>{document.file_name}</small><button className="btn outline" onClick={() => onOpen(document, subject, document.unit_number ? `Unit ${document.unit_number}` : 'Study note')}>Open in STDiO Viewer</button></div></article>)}</div> : <EmptyResources loading={loading} connected={connected} label="study notes" />}</section>
     : <SubjectList subjects={subjects} source={source} title="Choose a subject" onSelect={setSubject} />}</>
 }
