@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BookOpen, Bot, ChevronRight, FileText, FolderOpen, MessageSquare, Minimize2, Plus, Send, Sparkles, X } from 'lucide-react'
+import { BookOpen, Bot, ChevronRight, FileText, MessageSquare, Minimize2, Send, Sparkles, X } from 'lucide-react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
 import './coming-soon.css'
@@ -18,7 +18,7 @@ function AppShell({ children, view, setView, drawer, setDrawer }: {
   drawer: boolean
   setDrawer: (open: boolean) => void
 }) {
-  const nav: [View, string][] = [['questions', 'Question Bank'], ['notes', 'Study Notes'], ['library', 'Library']]
+  const nav: [View, string][] = [['questions', 'Question Bank'], ['notes', 'Study Notes'], ['library', 'Tools']]
 
   return <div className="app-shell">
     <header className="topnav">
@@ -29,14 +29,14 @@ function AppShell({ children, view, setView, drawer, setDrawer }: {
     <main>{children}</main>
     <aside className="rail">
       <button className={drawer ? 'rail-active' : ''} onClick={() => setDrawer(!drawer)} aria-label="Open AI Assistant"><Bot /></button>
-      <button aria-label="Open One-Shot"><Sparkles /></button>
-      <button onClick={() => setView('questions')} aria-label="Open question bank"><FileText /></button>
+      <button onClick={() => setView('library')} aria-label="Open Tools" title="Tools"><Sparkles /></button>
+      <button onClick={() => setView('notes')} aria-label="Open Study Notes" title="Study Notes"><FileText /></button>
     </aside>
     {drawer && <ToolDrawer close={() => setDrawer(false)} />}
     <nav className="bottomnav">
       <button className={view === 'questions' ? 'mobile-active' : ''} onClick={() => setView('questions')}><FileText size={18}/><span>Question Bank</span></button>
       <button className={view === 'notes' ? 'mobile-active' : ''} onClick={() => setView('notes')}><BookOpen size={18}/><span>Study Notes</span></button>
-      <button className={view === 'library' ? 'mobile-active' : ''} onClick={() => setView('library')}><FolderOpen size={18}/><span>Library</span></button>
+      <button className={view === 'library' ? 'mobile-active' : ''} onClick={() => setView('library')}><Sparkles size={18}/><span>Tools</span></button>
     </nav>
   </div>
 }
@@ -61,8 +61,8 @@ function FloatingAI() {
   </aside>}<button className="ai-fab" onClick={() => setOpen(!open)} aria-label="Toggle floating AI"><MessageSquare size={20}/><span>AI</span></button></>
 }
 
-function Library() {
-  return <><section className="page-heading"><p className="eyebrow">YOUR MATERIALS</p><h1>Library</h1><p className="lede">A quiet place for all your source material.</p></section><div className="empty-library"><FolderOpen size={28}/><h2>Organize your course materials</h2><p>Add PDFs, PPTs and notes to build your personal academic archive.</p><button className="btn primary"><Plus size={16}/> Add material</button></div></>
+function Tools() {
+  return <><section className="page-heading"><p className="eyebrow">STUDY SUPPORT</p><h1>Tools</h1><p className="lede">Quick access to tools that support your learning.</p></section><div className="empty-library"><Sparkles size={28}/><h2>Study tools</h2><p>Tools for working with your course materials will appear here.</p></div></>
 }
 
 function App() {
@@ -70,7 +70,7 @@ function App() {
   const [drawer, setDrawer] = useState(false)
   const [viewer, setViewer] = useState<{ document: AcademicDocument; subject: AcademicSubject; category: string } | null>(null)
   const openDocument = (document: AcademicDocument, subject: AcademicSubject, category: string) => setViewer({ document, subject, category })
-  const content = view === 'questions' ? <QuestionBanksV2 onOpen={openDocument}/> : view === 'notes' ? <StudyNotesV2 onOpen={openDocument}/> : <Library/>
+  const content = view === 'questions' ? <QuestionBanksV2 onOpen={openDocument}/> : view === 'notes' ? <StudyNotesV2 onOpen={openDocument}/> : <Tools/>
 
   return <AppShell view={view} setView={nextView => { setViewer(null); setView(nextView) }} drawer={drawer} setDrawer={setDrawer}>
     <div className={'page ' + (viewer ? 'stdio-source-hidden' : '')} aria-hidden={viewer ? true : undefined}>{content}<FloatingAI/></div>
