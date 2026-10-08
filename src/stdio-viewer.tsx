@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, BookOpen, FileText, Info, Maximize2, MessageSquareText, Minimize2, Minus, RotateCw, Send, Sparkles } from 'lucide-react'
 import type { AcademicDocument, AcademicSubject } from './academic-collections'
 import { StdioLogo } from './stdio-logo'
+import { AnswerContent } from './answer-content'
 import './stdio-viewer.css'
 
 type Source = { id: string; page: number; excerpt: string }
@@ -114,7 +115,7 @@ export function StdioViewer({ document, subject, category, onBack }: Props) {
           </div>}
           {messages.map(message => <article key={message.id} className={`stdio-chat-message ${message.role}${message.error ? ' error' : ''}`}>
             <span className="stdio-chat-role">{message.role === 'user' ? 'YOU' : 'STDiO BOT'}</span>
-            <p>{message.content}</p>
+            {message.error ? <p>{message.content}</p> : <AnswerContent content={message.content} />}
             {message.sources?.length ? <div className="stdio-chat-sources"><span>IN THIS PDF</span>{message.sources.map(source => <button key={`${message.id}-${source.id}`} onClick={() => setPdfPage(source.page)} title={source.excerpt}>p. {source.page}</button>)}</div> : null}
           </article>)}
           {loading && <div className="stdio-chat-thinking"><span className="stdio-thinking-dots"><i /><i /><i /></span>{messages.length < 2 ? 'Reading this PDF and finding the best passages…' : 'Checking the PDF for your answer…'}</div>}

@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib'
+import { plainAnswerText } from '../../shared/plain-answer.js'
 
 export type NotesSourceDocument = {
   id: string
@@ -88,7 +89,7 @@ export async function createStudyNotesPdf(source: NotesSourceDocument, notes: st
     }
   }
 
-  for (const rawLine of notes.replace(/```[\w-]*\n?/g, '').split(/\r?\n/)) {
+  for (const rawLine of plainAnswerText(notes).replace(/```[\w-]*\n?/g, '').split(/\r?\n/)) {
     let line = rawLine.trim().replace(/\*\*(.*?)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1')
     if (!line) { y -= 5; continue }
     if (/^\|?\s*:?-{3,}/.test(line)) continue

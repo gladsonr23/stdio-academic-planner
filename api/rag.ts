@@ -2,6 +2,7 @@ import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3
 import { neon } from '@neondatabase/serverless'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { env } from './lib/runtime.js'
+import { plainAnswerText } from '../shared/plain-answer.js'
 
 const embeddingModel = 'gemini-embedding-001'
 const answerModel = env.GEMINI_RAG_MODEL || 'gemini-3.8-flash'
@@ -256,12 +257,13 @@ async function answerQuestion(index: RagIndex, question: string, history: ChatTu
       'Cite every substantive claim with exact source labels such as [S1]. Cite only labels supplied with the passages. Do not invent sources or page numbers.',
       'If retrieved passages do not contain enough evidence, say so plainly and suggest what the student could search or ask next.',
       'For summaries or study guides, synthesize across the retrieved pages and avoid implying that a selective overview is an exhaustive summary of every page.',
-      'Keep the answer focused. Use ordered steps for processes and a compact table only when it genuinely helps a comparison.',
+      'Write all mathematics in plain text, never LaTeX or math delimiters. For example, write O(n), Omega(1), and Theta(1), not dollar signs, backslashes, or LaTeX commands.',
+      'Structure answers with a short heading when useful, concise paragraphs, and properly formatted numbered or bulleted lists. Keep the answer focused; use a compact table only when it genuinely helps a comparison.',
     ].join(' ') }] },
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 1100 },
   })
-  const rawAnswer = data.candidates?.[0]?.content?.parts?.map(part => part.text ?? '').join('').trim()
+  const rawAnswer = plainAnswerText(data.candidates?.[0]?.content?.parts?.map(part => part.text ?? '').join('').trim() ?? '')
   if (!rawAnswer) throw new Error('The AI service returned an empty answer. Please try again.')
   const citedIds = [...new Set(Array.from(rawAnswer.matchAll(/\[(S\d+)\]/g), match => match[1]))]
   const valid = selected.filter(chunk => citedIds.includes(chunk.sourceId))

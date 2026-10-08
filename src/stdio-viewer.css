@@ -54,6 +54,12 @@
 .stdio-chat-role{font-size:8px;font-weight:700;letter-spacing:.09em;color:var(--orange)}
 .stdio-chat-message.user .stdio-chat-role{color:var(--green)}
 .stdio-chat-message>p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:1.6;margin:5px 0 0;color:var(--ink)}
+.stdio-answer-content{overflow-wrap:anywhere;font-size:11px;line-height:1.6;color:var(--ink)}
+.stdio-answer-content p{margin:5px 0 8px;white-space:pre-wrap}
+.stdio-answer-content h3{font-size:11px;line-height:1.45;margin:10px 0 4px;color:var(--green)}
+.stdio-answer-content ul,.stdio-answer-content ol{margin:5px 0 8px;padding-left:20px}
+.stdio-answer-content li{padding-left:2px;margin:3px 0}
+.stdio-answer-content code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#f1eee7;padding:1px 3px;border-radius:3px}
 .stdio-chat-message.error>p{color:#a14232}
 .stdio-chat-sources{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:8px}
 .stdio-chat-sources>span{font-size:8px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-right:3px}

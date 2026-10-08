@@ -4,6 +4,7 @@ import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { isAdminRequest } from './lib/admin-auth.js'
 import { env } from './lib/runtime.js'
 import { createStudyNotesPdf, type NotesSourceDocument } from './lib/study-notes-pdf.js'
+import { plainAnswerText } from '../shared/plain-answer.js'
 
 const maxPdfBytes = 4 * 1024 * 1024
 const maxSourcePages = 120
@@ -77,7 +78,8 @@ async function generateSolvedNotes(source: NotesSourceDocument, questionBankText
       'Preserve the original question numbering and wording as much as possible, then provide a clear, correct answer at an appropriate student level.',
       'Show key reasoning, definitions, steps, and code examples when the question calls for them. Keep answers proportionate and useful for revision.',
       'Do not invent marks, course-specific rules, or missing question text. If a question is incomplete or ambiguous, say so clearly and give a cautious answer only when supported.',
-      'Use Markdown headings for sections and questions. Use plain text/code fences for code; avoid wide tables.',
+      'Use Markdown headings and numbered or bulleted lists to give the notes a clear structure. Use plain text/code fences for code; avoid wide tables.',
+      'Write all mathematics in plain text, never LaTeX or math delimiters. For example, write O(n), Omega(1), and Theta(1), not dollar signs, backslashes, or LaTeX commands.',
       'The admin will review this draft before it is published. Output only the study guide content, without a preamble about your role.',
     ].join(' ') }] },
     contents: [{ role: 'user', parts: [{ text: [
@@ -120,7 +122,7 @@ async function generateSolvedNotes(source: NotesSourceDocument, questionBankText
       if (candidate?.finishReason === 'MAX_TOKENS') {
         throw Object.assign(new Error('The generated answer set was too long for one PDF. Use a shorter or section-specific question bank.'), { status: 413 })
       }
-      const notes = candidate?.content?.parts?.map(part => part.text ?? '').join('').trim()
+      const notes = plainAnswerText(candidate?.content?.parts?.map(part => part.text ?? '').join('').trim() ?? '')
       if (!notes) throw new Error('Gemini returned an empty study guide. Try generating the draft again.')
       return notes
     } catch (error) {
