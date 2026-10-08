@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BookOpen, Bot, ChevronRight, FileText, MessageSquare, Minimize2, Presentation, Send, Sparkles, Video, X } from 'lucide-react'
+import { BookOpen, Bot, ChevronRight, FileText, Presentation, Send, Sparkles, Video, X } from 'lucide-react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
 import './coming-soon.css'
@@ -51,15 +51,6 @@ function ToolDrawer({ close }: { close: () => void }) {
   </aside>
 }
 
-function FloatingAI() {
-  const [open, setOpen] = useState(false)
-  const [mini, setMini] = useState(false)
-  return <>{open && <aside className={'floating-ai ' + (mini ? 'minimized' : '')}>
-    <header><div><b>STDIO AI</b><p>Using your study material</p></div><div><button onClick={() => setMini(!mini)} aria-label="Minimize"><Minimize2 size={16}/></button><button onClick={() => setOpen(false)} aria-label="Close"><X size={16}/></button></div></header>
-    {!mini && <><p className="ai-copy">I have your current study material in context.</p><button className="ai-suggest">Explain this question</button><label className="chat-input"><input placeholder="Ask anything…"/><button aria-label="Send"><Send size={16}/></button></label></>}
-  </aside>}<button className="ai-fab" onClick={() => setOpen(!open)} aria-label="Toggle floating AI"><MessageSquare size={20}/><span>AI</span></button></>
-}
-
 function Tools() {
   const tools = [
     { title: 'YouTube video to notes', detail: 'Turn a lecture video into clear study notes.', icon: Video, available: true },
@@ -77,7 +68,7 @@ function App() {
   const content = view === 'questions' ? <QuestionBanksV2 onOpen={openDocument}/> : view === 'notes' ? <StudyNotesV2 onOpen={openDocument}/> : <Tools/>
 
   return <AppShell view={view} setView={nextView => { setViewer(null); setView(nextView) }} drawer={drawer} setDrawer={setDrawer}>
-    <div className={'page ' + (viewer ? 'stdio-source-hidden' : '')} aria-hidden={viewer ? true : undefined}>{content}<FloatingAI/></div>
+    <div className={'page ' + (viewer ? 'stdio-source-hidden' : '')} aria-hidden={viewer ? true : undefined}>{content}</div>
     {viewer && <StdioViewer {...viewer} onBack={() => setViewer(null)} />}
   </AppShell>
 }

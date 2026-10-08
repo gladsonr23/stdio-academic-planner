@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { ArrowLeft, BookOpen, FileText, MessageSquareText, RotateCw, Send, Sparkles } from 'lucide-react'
+import { ArrowLeft, BookOpen, FileText, Info, Maximize2, MessageSquareText, Minimize2, Minus, RotateCw, Send, Sparkles } from 'lucide-react'
 import type { AcademicDocument, AcademicSubject } from './academic-collections'
 import { StdioLogo } from './stdio-logo'
 import './stdio-viewer.css'
@@ -25,12 +25,16 @@ export function StdioViewer({ document, subject, category, onBack }: Props) {
   const [question, setQuestion] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
+  const [chatMaximized, setChatMaximized] = useState(false)
+  const [chatMinimized, setChatMinimized] = useState(false)
   const chatEnd = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setMessages([])
     setQuestion('')
     setPdfPage(null)
+    setChatMaximized(false)
+    setChatMinimized(false)
   }, [document.id])
 
   useEffect(() => {
@@ -83,7 +87,7 @@ export function StdioViewer({ document, subject, category, onBack }: Props) {
       <div className="stdio-viewer-filemeta"><span>{category}</span><span>{document.academic_year ?? 'Academic material'}</span></div>
     </header>
 
-    <div className="stdio-viewer-layout">
+    <div className={`stdio-viewer-layout${chatMaximized ? ' chat-maximized' : ''}${chatMinimized ? ' chat-minimized' : ''}`}>
       <div className="stdio-pdf-pane">
         <div className="stdio-pdf-toolbar">
           <div><FileText size={16} /><span title={document.file_name}>{document.file_name}</span></div>
@@ -93,9 +97,13 @@ export function StdioViewer({ document, subject, category, onBack }: Props) {
         <p className="stdio-pdf-hint">Select a source below to jump to that page. You can also copy a passage and ask about it.</p>
       </div>
 
-      <aside className="stdio-rag-panel" aria-label="Ask STDiO Bot about this document">
-        <div className="stdio-rag-title"><span><StdioLogo className="stdio-rag-logo" /></span><div><p>STDiO BOT</p><h2>Ask about this file</h2></div></div>
-        <div className="stdio-context-card"><span>DOCUMENT CONTEXT</span><b>{document.title}</b><p>{subject.code} · {subject.name}</p><small><Sparkles size={12} /> Answers grounded in this PDF</small></div>
+      <aside className="stdio-rag-panel" aria-label="Ask STDiO Bot about this document" aria-expanded={!chatMinimized}>
+        {chatMinimized ? <button className="stdio-chat-restore" onClick={() => setChatMinimized(false)} aria-label="Restore STDiO Bot" title="Restore STDiO Bot"><MessageSquareText size={19} /><span>STDiO Bot</span></button> : <>
+        <div className="stdio-rag-title"><span><StdioLogo className="stdio-rag-logo" /></span><div><p>STDiO BOT</p><h2>Ask about this file</h2></div><div className="stdio-chat-controls">
+          <button onClick={() => setChatMaximized(value => !value)} aria-label={chatMaximized ? 'Restore split view' : 'Maximize STDiO Bot'} title={chatMaximized ? 'Restore split view' : 'Maximize STDiO Bot'}><Maximize2 size={16} /></button>
+          <button onClick={() => { setChatMinimized(true); setChatMaximized(false) }} aria-label="Minimize STDiO Bot" title="Minimize STDiO Bot"><Minus size={17} /></button>
+        </div></div>
+        <div className="stdio-context-card"><span>DOCUMENT CONTEXT</span><b>{document.title}</b><p>{subject.code} · {subject.name}</p><small><Info size={12} aria-hidden="true" /> STDiO can make mistakes. Verify important details with the PDF.</small></div>
 
         <div className="stdio-rag-chat" aria-live="polite" aria-label="Conversation">
           {!messages.length && <div className="stdio-rag-welcome">
@@ -114,9 +122,15 @@ export function StdioViewer({ document, subject, category, onBack }: Props) {
 
         <form className="stdio-rag-composer" onSubmit={event => void ask(event)}>
           <label className="stdio-question-label" htmlFor="stdio-viewer-question">Your question</label>
-          <textarea id="stdio-viewer-question" value={question} onChange={event => setQuestion(event.target.value)} maxLength={1200} disabled={loading} placeholder="Ask about a concept, a page, or paste a question from the PDF…" />
-          <div className="stdio-composer-footer"><span>Relevant PDF text is sent to Google Gemini to answer.</span><button className="stdio-ask-button" disabled={!question.trim() || loading} type="submit"><MessageSquareText size={15} /> {loading ? 'Thinking…' : 'Ask STDiO Bot'} <Send size={13} /></button></div>
+          <textarea id="stdio-viewer-question" value={question} onChange={event => setQuestion(event.target.value)} onKeyDown={event => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+              event.preventDefault()
+              event.currentTarget.form?.requestSubmit()
+            }
+          }} aria-describedby="stdio-viewer-question-help" maxLength={1200} disabled={loading} placeholder="Ask about a concept, a page, or paste a question from the PDF…" />
+          <div className="stdio-composer-footer"><div id="stdio-viewer-question-help"><span>Relevant PDF text is sent to Google Gemini to answer.</span><span>Enter to send · Shift+Enter for a new line</span></div><button className="stdio-ask-button" disabled={!question.trim() || loading} type="submit"><MessageSquareText size={15} /> {loading ? 'Thinking…' : 'Ask STDiO Bot'} <Send size={13} /></button></div>
         </form>
+        </>}
       </aside>
     </div>
   </section>

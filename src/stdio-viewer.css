@@ -74,3 +74,27 @@
 @media(max-width:700px){.stdio-viewer{inset:58px 0 64px}.stdio-viewer-header{min-height:72px;padding:9px 13px;grid-template-columns:auto minmax(0,1fr);gap:8px 11px}.stdio-viewer-back{font-size:0;gap:0}.stdio-viewer-back svg{width:20px;height:20px}.stdio-viewer-heading h1{font-size:16px}.stdio-viewer-mark{width:31px;height:31px}.stdio-viewer-filemeta{grid-column:2;gap:5px}.stdio-viewer-filemeta span{font-size:9px;padding:3px 6px}.stdio-viewer-layout{display:flex;flex-direction:column;overflow:auto}.stdio-pdf-pane{height:58vh;min-height:350px;flex:none}.stdio-pdf-frame{min-height:0}.stdio-pdf-hint{font-size:9px}.stdio-rag-panel{min-height:440px;overflow:visible;border-left:0;border-top:1px solid var(--border);padding:17px 15px 22px}.stdio-rag-title{margin-bottom:12px}.stdio-rag-title h2{font-size:19px}.stdio-context-card{margin-bottom:10px}.stdio-rag-chat{flex:none;min-height:120px;max-height:44vh}.stdio-rag-panel textarea{min-height:78px}.stdio-composer-footer>span{max-width:145px}}
 @media(max-width:700px){.stdio-viewer{inset:58px 0 calc(64px + env(safe-area-inset-bottom))}.stdio-viewer-header{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}.stdio-viewer-layout{min-height:0;overscroll-behavior:contain}.stdio-pdf-pane{height:min(58dvh,560px);min-height:min(350px,45dvh)}.stdio-pdf-frame{width:100%;height:100%;min-width:0}.stdio-rag-panel textarea{font-size:16px;max-height:30dvh}}
 @media(prefers-reduced-motion:reduce){.stdio-viewer *{scroll-behavior:auto!important;transition:none!important}}
+.stdio-chat-controls{display:flex;gap:3px;margin-left:auto;align-self:flex-start}
+.stdio-chat-controls button{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--border);border-radius:7px;color:var(--muted);background:#fffdfa}
+.stdio-chat-controls button:hover,.stdio-chat-restore:hover{border-color:var(--green);color:var(--green);background:#f2f6f0}
+.stdio-chat-restore{height:100%;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--green);font-weight:700}
+.stdio-composer-footer>div{display:grid;gap:3px;max-width:155px;color:var(--faint);font-size:8px;line-height:1.4}
+.stdio-viewer-layout.chat-maximized{grid-template-columns:minmax(0,1fr)}
+.stdio-viewer-layout.chat-maximized .stdio-pdf-pane{display:none}
+.stdio-viewer-layout.chat-maximized .stdio-rag-panel{border-left:0;padding:24px clamp(18px,5vw,64px)}
+.stdio-viewer-layout.chat-maximized .stdio-context-card{max-width:700px}
+.stdio-viewer-layout.chat-minimized{grid-template-columns:minmax(0,1fr) 56px}
+.stdio-viewer-layout.chat-minimized .stdio-rag-panel{padding:8px 4px;border-left:1px solid var(--border)}
+@media(max-width:700px){
+  .stdio-chat-controls button{width:32px;height:32px}
+  .stdio-rag-title{gap:8px}
+  .stdio-rag-title h2{font-size:18px}
+  .stdio-viewer-layout.chat-maximized .stdio-pdf-pane{display:none}
+  .stdio-viewer-layout.chat-maximized .stdio-rag-panel{flex:1;min-height:0;overflow:hidden;padding:15px}
+  .stdio-viewer-layout.chat-maximized .stdio-rag-chat{flex:1;min-height:0;max-height:none}
+  .stdio-viewer-layout.chat-minimized{display:flex;flex:none;overflow:visible}
+  .stdio-viewer-layout.chat-minimized .stdio-pdf-pane{height:min(58dvh,560px)}
+  .stdio-viewer-layout.chat-minimized .stdio-rag-panel{flex:none;width:100%;height:54px;min-height:54px;overflow:hidden;border-left:0;border-top:1px solid var(--border);padding:0 12px}
+  .stdio-chat-restore{justify-content:flex-start}
+  .stdio-composer-footer>div{max-width:145px}
+}
