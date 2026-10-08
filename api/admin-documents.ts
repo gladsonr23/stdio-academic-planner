@@ -34,6 +34,37 @@ export async function GET(request: Request) {
   }
 }
 
+export async function PATCH(request: Request) {
+  if (!await isAdminRequest(request)) return Response.json({ error: 'Admin sign-in required' }, { status: 401 })
+  if (!env.DATABASE_URL) return Response.json({ error: 'DATABASE_URL is not configured' }, { status: 500 })
+  const id = new URL(request.url).searchParams.get('id')
+  if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+    return Response.json({ error: 'A valid document id is required' }, { status: 400 })
+  }
+
+  let title: unknown
+  try { title = (await request.json() as { title?: unknown }).title } catch {
+    return Response.json({ error: 'A valid JSON title is required' }, { status: 400 })
+  }
+  if (typeof title !== 'string' || !title.trim() || title.trim().length > 180) {
+    return Response.json({ error: 'Title is required and must be under 180 characters' }, { status: 400 })
+  }
+
+  try {
+    const sql = neon(env.DATABASE_URL)
+    const rows = await sql`
+      UPDATE documents SET title = ${title.trim()}
+      WHERE id = ${id} AND status = 'published'
+      RETURNING id, title
+    `
+    if (!rows[0]) return Response.json({ error: 'Published file not found' }, { status: 404 })
+    return Response.json({ document: rows[0] }, { headers: { 'Cache-Control': 'no-store' } })
+  } catch (error) {
+    console.error('Failed to rename academic document', error)
+    return Response.json({ error: 'Unable to rename this file. Refresh the list and try again.' }, { status: 500 })
+  }
+}
+
 export async function DELETE(request: Request) {
   if (!await isAdminRequest(request)) return Response.json({ error: 'Admin sign-in required' }, { status: 401 })
   if (!env.DATABASE_URL) return Response.json({ error: 'DATABASE_URL is not configured' }, { status: 500 })

@@ -34,7 +34,7 @@ function useNeonSubjects() {
   return { subjects, source }
 }
 
-function useNeonDocuments(subjectCode: string | undefined, type: 'question_paper' | 'question_bank' | 'study_note') {
+function useNeonDocuments(subjectCode: string | undefined, type: 'question_bank' | 'study_note') {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(false)
   const [connected, setConnected] = useState(false)
@@ -80,13 +80,12 @@ function EmptyResources({ loading, connected, label }: { loading: boolean; conne
 export function QuestionBanksV2({ onOpen }: { onOpen: (document: AcademicDocument, subject: AcademicSubject, category: string) => void }) {
   const [semester, setSemester] = useState(3)
   const [subject, setSubject] = useState<Subject | null>(null)
-  const [materialType, setMaterialType] = useState<'question_paper' | 'question_bank'>('question_paper')
   const { subjects, source } = useNeonSubjects()
-  const { documents, loading, connected } = useNeonDocuments(subject?.code, materialType)
-  const changeSemester = (number: number) => { setSemester(number); setSubject(null); setMaterialType('question_paper') }
-  return <><CollectionHeader eyebrow="ACADEMIC ARCHIVE" title="Question Papers" subtitle="Browse papers by semester and subject." /><SemesterPicker semester={semester} onChange={changeSemester} />{semester !== 3 ? <ComingSoon semester={semester} content="Question papers" /> : subject ?
-    <section className="collection-section resource-view"><button className="collection-back" onClick={() => setSubject(null)}><ArrowLeft size={15} /> All semester 3 subjects</button><div className="resource-title"><div><p className="eyebrow">{subject.code} · {subject.credits} CREDITS</p><h2>{subject.name}</h2></div></div><div className="admin-material-tabs"><button className={materialType==='question_paper'?'active':''} onClick={()=>setMaterialType('question_paper')}>Question papers</button><button className={materialType==='question_bank'?'active':''} onClick={()=>setMaterialType('question_bank')}>Question banks</button></div>{documents.length ? <div className="resource-grid">{documents.map(document =>
-      <button className="resource-card" onClick={() => onOpen(document, subject, document.exam_type ?? (materialType === 'question_bank' ? 'Question bank' : 'Question paper'))} key={document.id}><FileText size={21} /><div><span>{document.exam_type ?? (materialType==='question_bank' ? 'QUESTION BANK' : 'QUESTION PAPER')} · {document.academic_year ?? 'YEAR NOT SET'}</span><b>{document.title}</b><small>Open in STDiO Viewer <ChevronRight size={14} /></small></div></button>)}</div> : <EmptyResources loading={loading} connected={connected} label={materialType==='question_bank' ? 'question banks' : 'question papers'} />}</section>
+  const { documents, loading, connected } = useNeonDocuments(subject?.code, 'question_bank')
+  const changeSemester = (number: number) => { setSemester(number); setSubject(null) }
+  return <><CollectionHeader eyebrow="ACADEMIC ARCHIVE" title="Question Bank" subtitle="Browse question banks by semester and subject." /><SemesterPicker semester={semester} onChange={changeSemester} />{semester !== 3 ? <ComingSoon semester={semester} content="Question banks" /> : subject ?
+    <section className="collection-section resource-view"><button className="collection-back" onClick={() => setSubject(null)}><ArrowLeft size={15} /> All semester 3 subjects</button><div className="resource-title"><div><p className="eyebrow">{subject.code} · {subject.credits} CREDITS</p><h2>{subject.name}</h2></div></div>{documents.length ? <div className="resource-grid">{documents.map(document =>
+      <button className="resource-card" onClick={() => onOpen(document, subject, 'Question bank')} key={document.id}><FileText size={21} /><div><span>QUESTION BANK · {document.academic_year ?? 'YEAR NOT SET'}</span><b>{document.title}</b><small>Open in STDiO Viewer <ChevronRight size={14} /></small></div></button>)}</div> : <EmptyResources loading={loading} connected={connected} label="question banks" />}</section>
     : <SubjectList subjects={subjects} source={source} title="Choose a subject" onSelect={setSubject} />}</>
 }
 

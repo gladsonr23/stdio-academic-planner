@@ -1,43 +1,82 @@
 import React, { useState } from 'react'
+import { BookOpen, Bot, ChevronRight, FileText, FolderOpen, MessageSquare, Minimize2, Plus, Send, Sparkles, X } from 'lucide-react'
 import { createRoot } from 'react-dom/client'
-import { BookOpen, Bot, CalendarDays, ChevronRight, CircleHelp, FileText, FolderOpen, GraduationCap, LayoutDashboard, Maximize2, MessageSquare, Minimize2, MoreHorizontal, PanelRight, Plus, Search, Send, Sparkles, X, ZoomIn, ZoomOut } from 'lucide-react'
 import './styles.css'
 import './coming-soon.css'
-import { useSemesterSubjects } from './lib/academic-data'
 import { QuestionBanksV2, StudyNotesV2 } from './academic-collections'
 import type { AcademicDocument, AcademicSubject } from './academic-collections'
 import { StdioViewer } from './stdio-viewer'
 import { StdioLogo } from './stdio-logo'
 import { AdminPortal } from './admin-portal'
 
-type View = 'planner' | 'questions' | 'notes' | 'library'
-const frequency = [['Process Scheduling', 7], ["Peterson’s Solution", 6], ['Deadlock Conditions', 5], ['IPC Methods', 4]]
+type View = 'questions' | 'notes' | 'library'
 
-function AppShell({ children, view, setView, drawer, setDrawer }: {children: React.ReactNode, view: View, setView:(v:View)=>void, drawer:boolean, setDrawer:(v:boolean)=>void}) {
-  const nav: [View, string][] = [['questions','Question Papers'],['notes','Study Notes'],['library','Library']]
+function AppShell({ children, view, setView, drawer, setDrawer }: {
+  children: React.ReactNode
+  view: View
+  setView: (view: View) => void
+  drawer: boolean
+  setDrawer: (open: boolean) => void
+}) {
+  const nav: [View, string][] = [['questions', 'Question Bank'], ['notes', 'Study Notes'], ['library', 'Library']]
+
   return <div className="app-shell">
-    <header className="topnav"><div className="brand"><StdioLogo className="brand-logo"/><i></i><b>Academic Planner</b></div><nav>{nav.map(([key,label])=><button key={key} onClick={()=>setView(key)} className={view===key?'active':''}>{label}</button>)}</nav><button className="avatar" aria-label="Open team upload portal" title="Team upload portal" onClick={()=>window.location.assign(`${import.meta.env.BASE_URL}admin`)}>G</button></header>
+    <header className="topnav">
+      <div className="brand"><StdioLogo className="brand-logo"/><i/><b>Academic Planner</b></div>
+      <nav>{nav.map(([key, label]) => <button key={key} onClick={() => setView(key)} className={view === key ? 'active' : ''}>{label}</button>)}</nav>
+      <button className="avatar" aria-label="Open team upload portal" title="Team upload portal" onClick={() => window.location.assign(`${import.meta.env.BASE_URL}admin`)}>G</button>
+    </header>
     <main>{children}</main>
-    <aside className="rail"><button className={drawer?'rail-active':''} onClick={()=>setDrawer(!drawer)} aria-label="Open AI Assistant"><Bot /></button><button aria-label="Open One-Shot"><Sparkles /></button><button onClick={()=>setView('questions')} aria-label="Open question papers"><FileText /></button></aside>
-    {drawer && <ToolDrawer close={()=>setDrawer(false)} />}
-    <nav className="bottomnav"><button className={view==='questions'?'mobile-active':''} onClick={()=>setView('questions')}><FileText size={18}/><span>Question Papers</span></button><button className={view==='notes'?'mobile-active':''} onClick={()=>setView('notes')}><BookOpen size={18}/><span>Study Notes</span></button><button className={view==='library'?'mobile-active':''} onClick={()=>setView('library')}><FolderOpen size={18}/><span>Library</span></button></nav>
+    <aside className="rail">
+      <button className={drawer ? 'rail-active' : ''} onClick={() => setDrawer(!drawer)} aria-label="Open AI Assistant"><Bot /></button>
+      <button aria-label="Open One-Shot"><Sparkles /></button>
+      <button onClick={() => setView('questions')} aria-label="Open question bank"><FileText /></button>
+    </aside>
+    {drawer && <ToolDrawer close={() => setDrawer(false)} />}
+    <nav className="bottomnav">
+      <button className={view === 'questions' ? 'mobile-active' : ''} onClick={() => setView('questions')}><FileText size={18}/><span>Question Bank</span></button>
+      <button className={view === 'notes' ? 'mobile-active' : ''} onClick={() => setView('notes')}><BookOpen size={18}/><span>Study Notes</span></button>
+      <button className={view === 'library' ? 'mobile-active' : ''} onClick={() => setView('library')}><FolderOpen size={18}/><span>Library</span></button>
+    </nav>
   </div>
 }
 
-function AcademicHero(){return <section className="hero"><div><p className="eyebrow">ACADEMIC WORKSPACE</p><h1>Academic Planner</h1><p className="lede">Your study material, questions and revision — connected.</p></div><NextAssessment/></section>}
-function NextAssessment(){return <article className="assessment"><p className="eyebrow">NEXT ASSESSMENT</p><div className="assess-content"><div className="date"><b>08</b><span>OCT</span></div><div><h3>CT1 · Operating Systems</h3><p>4 days remaining</p></div></div><div className="card-actions"><button className="btn outline">View Plan</button><button className="btn primary">Continue</button></div></article>}
-function Planner(){return <><AcademicHero/><section className="section-head"><div><p className="eyebrow">TODAY · 03 OCT</p><h2>Today’s Study Plan</h2></div><button className="text-btn">View full plan <ChevronRight size={16}/></button></section><div className="plan-grid"><article className="study-block"><span className="time">09:30 — 10:45</span><div><b>Operating Systems</b><p>Unit 3 · Synchronization & mutual exclusion</p></div><span className="status">In progress</span></article><article className="study-block"><span className="time">14:00 — 14:45</span><div><b>Revision</b><p>Process scheduling · mapped questions</p></div><button className="icon-button"><ChevronRight size={17}/></button></article></div><div className="content-grid"><section><SectionHeading title="Continue Studying" action="View materials"/><div className="material-list"><Material title="Operating Systems — Unit 3" subtitle="Faculty notes · 18 min read" type="NOTES"/><Material title="CT1 2026 · Operating Systems" subtitle="Question paper · Page 2 of 4" type="PAPER"/></div></section><section><SectionHeading title="High Frequency Questions" action="Open bank"/><div className="question-list">{frequency.slice(0,3).map(([q,n],i)=><div key={q}><span>0{i+1}</span><b>{q}</b><em>{n} appearances</em></div>)}</div></section></div><section className="recent"><SectionHeading title="Recently Indexed Papers" action="Browse archive"/><div className="paper-row"><PaperTag label="CT1"/><span>Operating Systems</span><small>2026</small><button className="text-btn">Open <ChevronRight size={16}/></button></div></section></>}
-function SectionHeading({title,action}:{title:string,action:string}) {return <div className="section-head compact"><h2>{title}</h2><button className="text-btn">{action}<ChevronRight size={16}/></button></div>}
-function Material({title,subtitle,type}:{title:string,subtitle:string,type:string}){return <article className="material"><div className="file-icon"><FileText size={19}/></div><div><span className="eyebrow">{type}</span><b>{title}</b><p>{subtitle}</p></div><button className="icon-button"><ChevronRight size={17}/></button></article>}
-function PaperTag({label}:{label:string}){return <span className="tag">{label}</span>}
+function ToolDrawer({ close }: { close: () => void }) {
+  return <aside className="tool-drawer">
+    <header><div><b>STDIO AI</b><p>Using your study material</p></div><button className="icon-button" onClick={close} aria-label="Close assistant"><X size={18}/></button></header>
+    <div className="assistant-context"><span>Operating Systems</span><span>Question bank</span><span>Page 2</span></div>
+    <h3>How can I help with this material?</h3>
+    <div className="prompts">{['Explain this question', 'Give me a 5-mark answer', 'Has this concept appeared before?', 'What should I revise from Unit 3?'].map(prompt => <button key={prompt}>{prompt}<ChevronRight size={15}/></button>)}</div>
+    <div className="sources"><b>Sources · 3</b><p>OS_Unit3.pdf · Faculty material<br/>OS_Question_Bank.pdf · Question bank</p></div>
+    <label className="chat-input"><input aria-label="Ask STDIO AI" placeholder="Ask about your material…"/><button aria-label="Send"><Send size={16}/></button></label>
+  </aside>
+}
 
-function QuestionBanks({onOpen}:{onOpen:()=>void}){const [semester,setSemester]=useState(3);const {subjects,loading,source}=useSemesterSubjects(semester);const isBetaSemester=semester===3;return <><section className="page-heading"><p className="eyebrow">ARCHIVE</p><h1>Question Banks</h1><p className="lede">Every paper. Every question. Every answer.</p></section><div className="semester-grid">{Array.from({length:8},(_,i)=>i+1).map(num=><button onClick={()=>setSemester(num)} key={num} className={'semester-card '+(semester===num?'selected':'')}><span>SEMESTER {String(num).padStart(2,'0')}</span><b>{num===3?'4':'Coming soon'}</b><small>{num===3?'Beta subjects':'Not in beta'}</small>{semester===num&&<i/>}</button>)}</div>{isBetaSemester?<><section className="archive"><div className="section-head compact"><div><p className="eyebrow">SEMESTER 03</p><h2>Examination archive</h2></div><span className={'data-source '+source}>{loading?'Loading academic data…':source==='supabase'?'Live academic data':'Sample data'}</span></div><div className="exam-grid">{[['CT1','Question Papers'],['CT2','Question Papers'],['Semester Exam','Question Papers']].map(([exam,count])=><button className="exam-card" onClick={onOpen} key={exam}><PaperTag label={exam}/><b>{count}</b><span>Open papers <ChevronRight size={15}/></span></button>)}</div></section><section className="subjects"><SectionHeading title="Subjects" action="Semester overview"/><div className="subject-table">{subjects.map(subject=><button key={subject.id} onClick={onOpen}><b>{subject.name}</b><span>{subject.papers} papers</span><span>{subject.questions} mapped</span><span>{subject.years}</span><ChevronRight size={17}/></button>)}</div></section></>:<section className="semester-coming-soon" aria-live="polite"><p className="eyebrow">SEMESTER {String(semester).padStart(2,'0')}</p><h2>Coming soon</h2><p>Question banks for this semester are not part of the beta yet.</p></section>}</>}
+function FloatingAI() {
+  const [open, setOpen] = useState(false)
+  const [mini, setMini] = useState(false)
+  return <>{open && <aside className={'floating-ai ' + (mini ? 'minimized' : '')}>
+    <header><div><b>STDIO AI</b><p>Using your study material</p></div><div><button onClick={() => setMini(!mini)} aria-label="Minimize"><Minimize2 size={16}/></button><button onClick={() => setOpen(false)} aria-label="Close"><X size={16}/></button></div></header>
+    {!mini && <><p className="ai-copy">I have your current study material in context.</p><button className="ai-suggest">Explain this question</button><label className="chat-input"><input placeholder="Ask anything…"/><button aria-label="Send"><Send size={16}/></button></label></>}
+  </aside>}<button className="ai-fab" onClick={() => setOpen(!open)} aria-label="Toggle floating AI"><MessageSquare size={20}/><span>AI</span></button></>
+}
 
-function Viewer({back}:{back:()=>void}){const [selected,setSelected]=useState(true); const [filter,setFilter]=useState('All'); return <section className="viewer"><header className="viewer-top"><button className="text-btn" onClick={back}>‹ Back to archive</button><span>CT1 · Operating Systems · 2026</span><div><button className="icon-button" aria-label="Zoom out"><ZoomOut size={17}/></button><b>110%</b><button className="icon-button" aria-label="Zoom in"><ZoomIn size={17}/></button><button className="icon-button" aria-label="Search paper"><Search size={17}/></button><button className="icon-button" aria-label="Fullscreen"><Maximize2 size={17}/></button></div></header><div className="viewer-body"><article className="paper"><div className="paper-head"><span>Department of Computer Science</span><h2>Operating Systems</h2><p>Continuous Test 1 · 2026</p><small>Time: 60 minutes &nbsp; | &nbsp; Maximum Marks: 25</small></div><div className="paper-section"><b>PART B — Answer any two questions</b><p className={selected?'question-highlight':''} onClick={()=>setSelected(!selected)}><strong>3.</strong> Explain Peterson’s solution for the critical-section problem. <em>(8 Marks)</em></p><p><strong>4.</strong> Discuss the necessary conditions for deadlock with suitable examples. <em>(8 Marks)</em></p><p><strong>5.</strong> Explain the role of semaphores in process synchronization. <em>(8 Marks)</em></p></div>{selected&&<div className="selection-toolbar"><button>View Answer</button><button>Ask AI</button><button>Add to Revision</button></div>}</article><aside className="intelligence"><p className="eyebrow">QUESTION INTELLIGENCE</p><h2>Explain Peterson’s solution for the critical-section problem.</h2><div className="metrics"><div><b>4</b><span>Appearances</span></div><div><b>3</b><span>Question variants</span></div></div><div className="detail"><span>REPETITION</span><b>Appeared 4 times</b><p>CT1 · 2024 &nbsp; CT1 · 2025<br/>Semester · 2025 &nbsp; CT1 · 2026</p></div><div className="detail split"><span>UNIT</span><b>3</b><span>MARKS</span><b>8</b></div><div className="available"><BookOpen size={16}/><div><b>Mapped Answer</b><p>Faculty Material · Available</p></div></div><div className="stack-actions"><button className="btn primary">View Mapped Answer</button><button className="btn outline">Explain with AI</button><button className="btn outline">Find Similar Questions</button></div><div className="filterbar">{['All','2 Marks','5 Marks','8 Marks','Repeated'].map(f=><button onClick={()=>setFilter(f)} className={filter===f?'filter-active':''} key={f}>{f}</button>)}</div></aside></div></section>}
-function ToolDrawer({close}:{close:()=>void}){return <aside className="tool-drawer"><header><div><b>STDIO AI</b><p>Using your study material</p></div><button className="icon-button" onClick={close}><X size={18}/></button></header><div className="assistant-context"><span>Operating Systems</span><span>CT1 · 2026</span><span>Page 2</span></div><h3>How can I help with this paper?</h3><div className="prompts">{['Explain this question','Give me a 5-mark answer','Has this concept appeared before?','What should I revise from Unit 3?'].map(p=><button key={p}>{p}<ChevronRight size={15}/></button>)}</div><div className="sources"><b>Sources · 3</b><p>OS_Unit3.pdf · Faculty material<br/>CT1_2024.pdf · Question paper</p></div><label className="chat-input"><input aria-label="Ask STDIO AI" placeholder="Ask about your material…"/><button aria-label="Send"><Send size={16}/></button></label></aside>}
-function FloatingAI(){const [open,setOpen]=useState(false); const [mini,setMini]=useState(false);return <>{open&&<aside className={'floating-ai '+(mini?'minimized':'')}><header><div><b>STDIO AI</b><p>Using your study material</p></div><div><button onClick={()=>setMini(!mini)} aria-label="Minimize"><Minimize2 size={16}/></button><button onClick={()=>setOpen(false)} aria-label="Close"><X size={16}/></button></div></header>{!mini&&<><p className="ai-copy">I have the current Operating Systems paper in context.</p><button className="ai-suggest">Explain this question</button><label className="chat-input"><input placeholder="Ask anything…"/><button aria-label="Send"><Send size={16}/></button></label></>}</aside>}<button className="ai-fab" onClick={()=>setOpen(!open)} aria-label="Toggle floating AI"><MessageSquare size={20}/><span>AI</span></button></>}
-function Notes(){return <><section className="page-heading"><p className="eyebrow">MATERIAL LIBRARY</p><h1>Study Notes</h1><p className="lede">Focused notes, generated from the material you trust.</p></section><div className="notes-grid">{['Operating Systems — Unit 3','Data Structures — Unit 2','Probability & Statistics — Unit 4'].map((note,i)=><article className="note-card" key={note}><div className="note-top"><FileText/><span>GENERATED NOTE</span></div><h2>{note}</h2><p>Generated from {i?'course_material.pdf':'OS_Unit3.pdf'}</p><div className="note-meta"><span>Updated 03 Oct</span><span>4 sections · 18 min read</span></div><footer><button className="btn outline">Open</button><button className="text-btn">Ask AI <ChevronRight size={16}/></button></footer></article>)}</div></>}
-function Library(){return <><section className="page-heading"><p className="eyebrow">YOUR MATERIALS</p><h1>Library</h1><p className="lede">A quiet place for all your source material.</p></section><div className="empty-library"><FolderOpen size={28}/><h2>Organize your course materials</h2><p>Add PDFs, PPTs and notes to build your personal academic archive.</p><button className="btn primary"><Plus size={16}/> Add material</button></div></>}
-function App(){const [view,setView]=useState<View>('questions');const [drawer,setDrawer]=useState(false);const [viewer,setViewer]=useState<{document:AcademicDocument;subject:AcademicSubject;category:string}|null>(null);const openDocument=(document:AcademicDocument,subject:AcademicSubject,category:string)=>setViewer({document,subject,category});const content=view==='questions'?<QuestionBanksV2 onOpen={openDocument}/>:view==='notes'?<StudyNotesV2 onOpen={openDocument}/>:<Library/>;return <AppShell view={view} setView={(v)=>{setViewer(null);setView(v)}} drawer={drawer} setDrawer={setDrawer}><div className={'page '+(viewer?'stdio-source-hidden':'')} aria-hidden={viewer ? true : undefined}>{content}<FloatingAI/></div>{viewer&&<StdioViewer {...viewer} onBack={()=>setViewer(null)}/>}</AppShell>}
+function Library() {
+  return <><section className="page-heading"><p className="eyebrow">YOUR MATERIALS</p><h1>Library</h1><p className="lede">A quiet place for all your source material.</p></section><div className="empty-library"><FolderOpen size={28}/><h2>Organize your course materials</h2><p>Add PDFs, PPTs and notes to build your personal academic archive.</p><button className="btn primary"><Plus size={16}/> Add material</button></div></>
+}
+
+function App() {
+  const [view, setView] = useState<View>('questions')
+  const [drawer, setDrawer] = useState(false)
+  const [viewer, setViewer] = useState<{ document: AcademicDocument; subject: AcademicSubject; category: string } | null>(null)
+  const openDocument = (document: AcademicDocument, subject: AcademicSubject, category: string) => setViewer({ document, subject, category })
+  const content = view === 'questions' ? <QuestionBanksV2 onOpen={openDocument}/> : view === 'notes' ? <StudyNotesV2 onOpen={openDocument}/> : <Library/>
+
+  return <AppShell view={view} setView={nextView => { setViewer(null); setView(nextView) }} drawer={drawer} setDrawer={setDrawer}>
+    <div className={'page ' + (viewer ? 'stdio-source-hidden' : '')} aria-hidden={viewer ? true : undefined}>{content}<FloatingAI/></div>
+    {viewer && <StdioViewer {...viewer} onBack={() => setViewer(null)} />}
+  </AppShell>
+}
+
 const isAdminPath = window.location.pathname.replace(/\/$/, '') === '/admin'
-createRoot(document.getElementById('root')!).render(isAdminPath ? <AdminPortal/> : <App/>)
+createRoot(document.getElementById('root')!).render(isAdminPath ? <AdminPortal/> : <App/> )

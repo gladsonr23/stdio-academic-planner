@@ -4,9 +4,8 @@ import { isAdminRequest } from './lib/admin-auth.js'
 import { env } from './lib/runtime.js'
 
 const maxFileSize = 4 * 1024 * 1024
-const validTypes = new Set(['question_paper', 'question_bank', 'study_note'])
+const validTypes = new Set(['question_bank', 'study_note'])
 const folderByType = {
-  question_paper: 'question-papers',
   question_bank: 'question-banks',
   study_note: 'study-notes',
 } as const
@@ -49,7 +48,6 @@ export async function POST(request: Request) {
     const type = String(form.get('type') ?? '')
     const title = String(form.get('title') ?? '').trim()
     const academicYear = String(form.get('academicYear') ?? '').trim()
-    const examTypeInput = String(form.get('examType') ?? '').trim()
     const unitInput = String(form.get('unitNumber') ?? '').trim()
     const file = form.get('file')
 
@@ -63,10 +61,7 @@ export async function POST(request: Request) {
     const fileHeader = new Uint8Array(await file.slice(0, 5).arrayBuffer())
     if (new TextDecoder().decode(fileHeader) !== '%PDF-') return Response.json({ error: 'The selected file does not look like a valid PDF' }, { status: 400 })
 
-    const examType = examTypeInput || null
-    if (type === 'question_paper' && !['CT1', 'CT2', 'SEMESTER'].includes(examType ?? '')) {
-      return Response.json({ error: 'Choose CT1, CT2, or Semester Exam for a question paper' }, { status: 400 })
-    }
+    const examType = null
     const year = academicYear ? Number(academicYear) : null
     if (year !== null && (!Number.isInteger(year) || year < 2000 || year > 2100)) return Response.json({ error: 'Enter a valid academic year' }, { status: 400 })
     const unitNumber = unitInput ? Number(unitInput) : null
