@@ -1,9 +1,11 @@
 import { FormEvent, useEffect, useState } from 'react'
-import { ArrowLeft, Check, FileUp, LogOut, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Check, FileUp, LogOut, ShieldCheck, Trash2 } from 'lucide-react'
 import './admin-portal.css'
+import './admin-files.css'
 
 type Subject = { subject_code: string; subject_name: string; short_name: string; semester: number }
 type MaterialType = 'question_paper' | 'question_bank' | 'study_note'
+type AdminDocument = { id: string; title: string; document_type: MaterialType; exam_type: string | null; academic_year: string | null; file_name: string; created_at: string; semester: number; subject_code: string; short_name: string; subject_name: string }
 
 export function AdminPortal() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
@@ -15,6 +17,11 @@ export function AdminPortal() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [documents, setDocuments] = useState<AdminDocument[]>([])
+  const [documentsLoading, setDocumentsLoading] = useState(false)
+  const [documentsError, setDocumentsError] = useState('')
+  const [deletingId, setDeletingId] = useState('')
+  const [documentsVersion, setDocumentsVersion] = useState(0)
 
   useEffect(() => {
     fetch('/api/admin-session').then(response => response.json()).then(data => setAuthenticated(Boolean(data.authenticated))).catch(() => setAuthenticated(false))
@@ -27,6 +34,18 @@ export function AdminPortal() {
       .then(data => { setSubjects(data.subjects ?? []); setSubjectCode('') })
       .catch(() => { setSubjects([]); setError('Could not load subjects from Neon. Please check the database connection.') })
   }, [authenticated, semester])
+
+  useEffect(() => {
+    if (!authenticated) return
+    let active = true
+    setDocumentsLoading(true); setDocumentsError('')
+    fetch('/api/admin-documents')
+      .then(async response => { const data = await response.json(); if (!response.ok) throw new Error(data.error ?? 'Could not load uploaded files'); return data })
+      .then(data => { if (active) setDocuments(data.documents ?? []) })
+      .catch(cause => { if (active) setDocumentsError(cause instanceof Error ? cause.message : 'Could not load uploaded files') })
+      .finally(() => { if (active) setDocumentsLoading(false) })
+    return () => { active = false }
+  }, [authenticated, documentsVersion])
 
   async function signIn(event: FormEvent) {
     event.preventDefault(); setBusy(true); setError('')
@@ -50,8 +69,23 @@ export function AdminPortal() {
       if (!response.ok) throw new Error(data.error ?? 'Upload failed')
       setMessage(`${data.document.title} is uploaded and now available in the planner.`)
       formElement.reset()
+      setDocumentsVersion(version => version + 1)
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Upload failed') }
     finally { setBusy(false) }
+  }
+
+  async function removeDocument(document: AdminDocument) {
+    const accepted = window.confirm(`Remove “${document.title}” from the planner and delete its PDF from Neon Storage? This cannot be undone.`)
+    if (!accepted) return
+    setDeletingId(document.id); setError(''); setMessage('')
+    try {
+      const response = await fetch(`/api/admin-documents?id=${encodeURIComponent(document.id)}`, { method: 'DELETE' })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error ?? 'Could not remove this file')
+      setMessage(`${document.title} was removed from the planner and Storage.`)
+      setDocumentsVersion(version => version + 1)
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not remove this file') }
+    finally { setDeletingId('') }
   }
 
   async function signOut() {
@@ -87,6 +121,14 @@ export function AdminPortal() {
           </form>
           {message && <p className="admin-alert success" role="status"><Check size={16}/>{message}</p>}
           {error && <p className="admin-alert error" role="alert">{error}</p>}
+        </section>
+        <section className="admin-files" aria-labelledby="admin-files-title">
+          <div className="admin-files-heading"><div><p className="admin-eyebrow">LIBRARY MANAGEMENT</p><h2 id="admin-files-title">Uploaded files</h2></div><span>{documents.length} active</span></div>
+          {documentsLoading ? <div className="admin-files-empty">Loading uploaded files…</div> : documentsError ? <div className="admin-files-empty error">{documentsError}<button onClick={() => setDocumentsVersion(version => version + 1)}>Try again</button></div> : documents.length === 0 ? <div className="admin-files-empty">No active uploads yet. Files you publish will appear here.</div> : <div className="admin-files-list">{documents.map(document => <article className="admin-file-row" key={document.id}>
+            <div className="admin-file-main"><b>{document.title}</b><span>{document.subject_code} · {document.short_name} · Semester {String(document.semester).padStart(2, '0')}</span><small>{document.file_name}</small></div>
+            <div className="admin-file-meta"><span>{document.document_type === 'question_paper' ? document.exam_type ?? 'Question paper' : document.document_type === 'question_bank' ? 'Question bank' : 'Study note'}</span><span>{document.academic_year ?? 'Year not set'}</span></div>
+            <button className="admin-delete" disabled={Boolean(deletingId)} onClick={() => removeDocument(document)} aria-label={`Delete ${document.title}`} title="Delete file"><Trash2 size={16}/>{deletingId === document.id ? 'Removing…' : 'Delete'}</button>
+          </article>)}</div>}
         </section>
         <section className="admin-guidance"><b>Organized for you</b><p>Files go into <code>semester-{semester}/{subjectCode || 'subject-code'}/{type === 'question_paper' ? 'question-papers' : type === 'question_bank' ? 'question-banks' : 'study-notes'}/</code>. You won’t need to add a SQL row manually.</p></section>
       </>}
