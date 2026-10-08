@@ -98,6 +98,12 @@ export async function DELETE(request: Request) {
       return Response.json({ error: 'The PDF could not be removed from Storage. The planner entry was restored when possible; refresh and retry.' }, { status: 502 })
     }
 
+    try {
+      await storage.client.send(new DeleteObjectCommand({ Bucket: storage.bucket, Key: `rag-index/${id}-v1.json` }))
+    } catch (indexError) {
+      console.error('Could not remove cached study index from Neon Storage', indexError)
+    }
+
     return Response.json({ deleted: true }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     console.error('Failed to remove academic document', error)

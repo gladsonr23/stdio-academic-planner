@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "api/rag.ts": { "maxDuration": 60 }
+  },
   "rewrites": [
     { "source": "/admin", "destination": "/" },
     { "source": "/admin/", "destination": "/" }
