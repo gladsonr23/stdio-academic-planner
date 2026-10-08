@@ -14,6 +14,7 @@ export function AdminPortal() {
   const [semester, setSemester] = useState('3')
   const [subjectCode, setSubjectCode] = useState('')
   const [type, setType] = useState<MaterialType>('question_bank')
+  const [examType, setExamType] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -66,12 +67,14 @@ export function AdminPortal() {
     const formElement = event.currentTarget
     const form = new FormData(formElement)
     form.set('semester', semester); form.set('subjectCode', subjectCode); form.set('type', type)
+    form.set('examType', type === 'question_bank' ? examType : '')
     try {
       const response = await fetch('/api/upload', { method: 'POST', body: form })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? 'Upload failed')
       setMessage(`${data.document.title} is uploaded and now available in the planner.`)
       formElement.reset()
+      setExamType('')
       setDocumentsVersion(version => version + 1)
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Upload failed') }
     finally { setBusy(false) }
@@ -130,6 +133,7 @@ export function AdminPortal() {
             <div className="admin-form-grid">
               <label>Semester<select value={semester} onChange={event => setSemester(event.target.value)}>{Array.from({ length: 8 }, (_, i) => <option value={String(i + 1)} key={i + 1}>Semester {String(i + 1).padStart(2, '0')}</option>)}</select></label>
               <label>Material type<select value={type} onChange={event => setType(event.target.value as MaterialType)}><option value="question_bank">Question bank</option><option value="study_note">Study note</option></select></label>
+              {type === 'question_bank' && <label>Exam type<select name="examType" value={examType} onChange={event => setExamType(event.target.value)} required><option value="">Choose exam type</option><option value="CT1">CT1</option><option value="CT2">CT2</option><option value="SEMESTER">SEM</option></select></label>}
               <label className="admin-wide">Subject<select value={subjectCode} onChange={event => setSubjectCode(event.target.value)} required><option value="">{subjects.length ? 'Select a subject' : 'No subjects found for this semester'}</option>{subjects.map(subject => <option value={subject.subject_code} key={subject.subject_code}>{subject.subject_code} · {subject.short_name} — {subject.subject_name}</option>)}</select></label>
               <label className="admin-wide">Display title<input name="title" maxLength={180} placeholder="e.g. OS CT1 07.09.2026" required/></label>
               {type === 'study_note' && <label>Unit number <span className="admin-optional">(optional)</span><input name="unitNumber" inputMode="numeric" type="number" min="1" max="20" placeholder="e.g. 3"/></label>}
@@ -145,7 +149,7 @@ export function AdminPortal() {
           <div className="admin-files-heading"><div><p className="admin-eyebrow">LIBRARY MANAGEMENT</p><h2 id="admin-files-title">Uploaded files</h2></div><span>{documents.length} active</span></div>
           {documentsLoading ? <div className="admin-files-empty">Loading uploaded files…</div> : documentsError ? <div className="admin-files-empty error">{documentsError}<button onClick={() => setDocumentsVersion(version => version + 1)}>Try again</button></div> : documents.length === 0 ? <div className="admin-files-empty">No active uploads yet. Files you publish will appear here.</div> : <div className="admin-files-list">{documents.map(document => <article className="admin-file-row" key={document.id}>
             <div className="admin-file-main">{renamingId === document.id ? <input className="admin-rename-input" aria-label={`New display title for ${document.title}`} maxLength={180} value={renameTitle} onChange={event => setRenameTitle(event.target.value)} disabled={renameBusy}/> : <b>{document.title}</b>}<span>{document.subject_code} · {document.short_name} · Semester {String(document.semester).padStart(2, '0')}</span><small>{document.file_name}</small></div>
-            <div className="admin-file-meta"><span>{document.document_type === 'study_note' ? 'Study note' : 'Question bank'}</span><span>{document.academic_year ?? 'Year not set'}</span></div>
+            <div className="admin-file-meta"><span>{document.document_type === 'study_note' ? 'Study note' : `Question bank${document.exam_type ? ` · ${document.exam_type === 'SEMESTER' ? 'SEM' : document.exam_type}` : ''}`}</span><span>{document.academic_year ?? 'Year not set'}</span></div>
             <div className="admin-file-actions">{renamingId === document.id ? <><button className="admin-rename-save" disabled={renameBusy} onClick={() => renameDocument(document)} aria-label="Save new title">{renameBusy ? 'Saving…' : <><Check size={15}/> Save</>}</button><button className="admin-rename-cancel" disabled={renameBusy} onClick={() => setRenamingId('')} aria-label="Cancel rename"><X size={15}/><span>Cancel</span></button></> : <button className="admin-rename" disabled={Boolean(deletingId) || renameBusy} onClick={() => { setRenamingId(document.id); setRenameTitle(document.title); setError('') }} title="Change the title shown in the planner; the stored PDF stays unchanged." aria-label={`Rename ${document.title}`}><Pencil size={15}/> Rename</button>}
               <button className="admin-delete" disabled={Boolean(deletingId) || renameBusy} onClick={() => removeDocument(document)} aria-label={`Delete ${document.title}`} title="Delete file"><Trash2 size={16}/>{deletingId === document.id ? 'Removing…' : 'Delete'}</button></div>
           </article>)}</div>}
