@@ -67,6 +67,7 @@ export function StdioViewer({ document, subject, category, onBack }: Props) {
         sources: data.sources ?? [],
       }])
     } catch (error) {
+      setQuestion(prompt)
       setMessages(previous => [...previous, {
         id: crypto.randomUUID(), role: 'assistant',
         content: error instanceof Error ? error.message : 'STDiO Bot could not answer right now. Please try again.',
