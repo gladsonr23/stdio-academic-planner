@@ -35,7 +35,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .bottomnav button{min-width:68px;font-size:9px}
   .resource-title h2{font-size:23px;overflow-wrap:anywhere}
 }
-.topnav nav{margin-left:auto}
+.topnav nav{position:absolute;left:50%;transform:translateX(-50%);margin-left:0}
 .tool-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:25px}
 .tool-card{min-height:158px;padding:19px;border:1px solid var(--border);border-radius:9px;background:var(--surface);display:flex;flex-direction:column;align-items:flex-start}
 .tool-card>svg{color:var(--muted);margin:12px 0 8px}
@@ -44,5 +44,5 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .tool-card p{font-size:11px;color:var(--muted);margin:0}
 .tool-card-ready{border-color:var(--green)}
 .tool-card-ready>svg{color:var(--green)}
-@media(max-width:900px){.tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.topnav nav{position:static;transform:none;margin-left:auto}.tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.tool-grid{gap:9px;margin-top:20px}.tool-card{min-height:148px;padding:15px}.tool-card h2{font-size:17px}}
